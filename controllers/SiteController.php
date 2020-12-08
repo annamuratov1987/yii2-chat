@@ -4,11 +4,16 @@ namespace app\controllers;
 
 use Yii;
 use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\Response;
-use yii\filters\VerbFilter;
+use app\models\User;
 use app\models\LoginForm;
-use app\models\ContactForm;
+use app\models\RegistrationForm;
+use app\models\ChatMessage;
+use app\models\ChatMessageForm;
+use yii\widgets\ActiveForm;
+use yii\helpers\Url;
 
 class SiteController extends Controller
 {
@@ -20,14 +25,27 @@ class SiteController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['logout'],
+                'only' => ['login', 'registration', 'logout', 'users', 'incorrect-messages'],
                 'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['login', 'registration'],
+                        'roles' => ['?'],
+                    ],
                     [
                         'actions' => ['logout'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
+                    [
+                        'actions' => ['users', 'incorrect-messages'],
+                        'allow' => true,
+                        'roles' => ['admin'],
+                    ]
                 ],
+                'denyCallback' => function ($rule, $action) {
+                    throw new \Exception('У вас нет доступа к этой странице');
+                }
             ],
             'verbs' => [
                 'class' => VerbFilter::className(),
@@ -61,7 +79,14 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        $chatMessages = ChatMessage::find();
+        if (!Yii::$app->user->identity || !Yii::$app->user->identity->isAdmin()){
+            $chatMessages = $chatMessages->where(['status' => ChatMessage::STATUS_ACTIVE]);
+        }
+        $chatMessages = $chatMessages->orderBy('created_at DESC')->all();
+        $chatForm = new ChatMessageForm();
+
+        return $this->render('index', ['chatForm' => $chatForm, 'chatMessages' => $chatMessages]);
     }
 
     /**
@@ -98,31 +123,36 @@ class SiteController extends Controller
         return $this->goHome();
     }
 
-    /**
-     * Displays contact page.
-     *
-     * @return Response|string
-     */
-    public function actionContact()
-    {
-        $model = new ContactForm();
-        if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
-            Yii::$app->session->setFlash('contactFormSubmitted');
-
-            return $this->refresh();
+    public function actionRegistration(){
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
         }
-        return $this->render('contact', [
-            'model' => $model,
-        ]);
+        $model = new RegistrationForm();
+        if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+        if($model->load(\Yii::$app->request->post()) && $model->validate()){
+            $user = new User();
+            $user->firstname = $model->firstname;
+            $user->lastname = $model->lastname;
+            $user->username = $model->username;
+            $user->password = \Yii::$app->security->generatePasswordHash($model->password);
+            if($user->save()){
+                return $this->redirect(Url::to(['site/login']));
+            }
+        }
+
+        return $this->render('registration', compact('model'));
     }
 
-    /**
-     * Displays about page.
-     *
-     * @return string
-     */
-    public function actionAbout()
-    {
-        return $this->render('about');
+    public function actionUsers(){
+        $users = User::find()->where('id!=:id', [':id'=>Yii::$app->user->getId()])->all();
+        return $this->render('users', ['users' => $users]);
+    }
+
+    public function actionIncorrectMessages(){
+        $chatMessages = ChatMessage::find()->where('status=:status', [':status' => ChatMessage::STATUS_INCORRECT])->all();
+        return $this->render('incorrect-messages', ['chatMessages' => $chatMessages]);
     }
 }

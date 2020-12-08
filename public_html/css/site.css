@@ -113,3 +113,36 @@ a.desc:after {
 .nav > li > form > button.logout:focus {
     outline: none;
 }
+
+.chat-form-content {
+    position: absolute;
+    right: 0;
+    bottom: 60px;
+}
+
+.chat-content {
+    position: absolute;
+    left: 0;
+    top: 60px;
+    bottom: 60px;
+    overflow-y: scroll;
+    height: auto;
+}
+
+.float-right {
+    float: right !important;
+}
+
+.btn-incorrect, .btn-correct {
+    margin-right: 10px;
+}
+
+.list-group-item > .badge {
+    float: none !important;
+}
+
+@media (max-width: 767px) {
+    .chat-content {
+        bottom: 210px;
+    }
+}

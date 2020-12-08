@@ -43,14 +43,29 @@ $config = [
             ],
         ],
         'db' => $db,
-        /*
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+        ],
+
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
+            'enableStrictParsing' => false,
             'rules' => [
+                '/' => 'site/index',
+                'registration' => 'site/registration',
+                'login' => 'site/login',
+                'logout' => 'site/logout',
+                'users' => 'site/users',
+                'incorrect-messages' => 'site/incorrect-messages',
+                'chat/message/create' => 'chat-message/create',
+                'chat/message/<id>/incorrect' => 'chat-message/incorrect',
+                'chat/message/<id>/correct' => 'chat-message/correct',
+                'user/<id>/add-admin' => 'user/add-admin',
+                'user/<id>/remove-admin' => 'user/remove-admin',
             ],
         ],
-        */
+
     ],
     'params' => $params,
 ];
