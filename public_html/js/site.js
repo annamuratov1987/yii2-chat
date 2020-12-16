@@ -12,11 +12,10 @@
                 }
                 if (data.result == 'error'){
                     alert(data.message);
-                    window.location.href = '/login';
                 }
             },
-            error: function(jqXHR, errMsg) {
-                alert(errMsg);
+            error: function(jqXHR) {
+                alert(jqXHR.responseText);
             }
         });
         return false; // prevent default submit
@@ -34,8 +33,8 @@
                     alert(data.message);
                 }
             },
-            error: function(jqXHR, errMsg) {
-                alert(errMsg);
+            error: function(jqXHR) {
+                alert(jqXHR.responseText);
             }
         });
     });
@@ -52,8 +51,8 @@
                     alert(data.message);
                 }
             },
-            error: function(jqXHR, errMsg) {
-                alert(errMsg);
+            error: function(jqXHR) {
+                alert(jqXHR.responseText);
             }
         });
     });
@@ -70,8 +69,8 @@
                     alert(data.message);
                 }
             },
-            error: function(jqXHR, errMsg) {
-                alert(errMsg);
+            error: function(jqXHR) {
+                alert(jqXHR.responseText);
             }
         });
     });
@@ -88,8 +87,8 @@
                     alert(data.message);
                 }
             },
-            error: function(jqXHR, errMsg) {
-                alert(errMsg);
+            error: function(jqXHR) {
+                alert(jqXHR.responseText);
             }
         });
     });

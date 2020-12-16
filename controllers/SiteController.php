@@ -9,9 +9,7 @@ use yii\web\Controller;
 use yii\web\Response;
 use app\models\User;
 use app\models\LoginForm;
-use app\models\RegistrationForm;
 use app\models\ChatMessage;
-use app\models\ChatMessageForm;
 use yii\widgets\ActiveForm;
 use yii\helpers\Url;
 
@@ -84,7 +82,7 @@ class SiteController extends Controller
             $chatMessages = $chatMessages->where(['status' => ChatMessage::STATUS_ACTIVE]);
         }
         $chatMessages = $chatMessages->orderBy('created_at DESC')->all();
-        $chatForm = new ChatMessageForm();
+        $chatForm = new ChatMessage();
 
         return $this->render('index', ['chatForm' => $chatForm, 'chatMessages' => $chatMessages]);
     }
@@ -127,18 +125,13 @@ class SiteController extends Controller
         if (!Yii::$app->user->isGuest) {
             return $this->goHome();
         }
-        $model = new RegistrationForm();
+        $model = new User(['scenario' => User::SCENARIO_REGISTER]);
         if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
         }
-        if($model->load(\Yii::$app->request->post()) && $model->validate()){
-            $user = new User();
-            $user->firstname = $model->firstname;
-            $user->lastname = $model->lastname;
-            $user->username = $model->username;
-            $user->password = \Yii::$app->security->generatePasswordHash($model->password);
-            if($user->save()){
+        if($model->load(\Yii::$app->request->post())){
+            if ($model->save()){
                 return $this->redirect(Url::to(['site/login']));
             }
         }

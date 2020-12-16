@@ -8,7 +8,6 @@ use yii\filters\VerbFilter;
 use yii\web\Controller;
 use yii\web\Response;
 use app\models\ChatMessage;
-use app\models\ChatMessageForm;
 
 class ChatMessageController extends Controller
 {
@@ -20,7 +19,7 @@ class ChatMessageController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                //'only' => ['create'],
+                //'only' => ['correct', 'incorrect'],
                 'rules' => [
                     [
                         'actions' => ['create'],
@@ -34,16 +33,7 @@ class ChatMessageController extends Controller
                     ]
                 ],
                 'denyCallback' => function ($rule, $action) {
-                    if ($action->id == 'create'){
-                        Yii::$app->response->format = Response::FORMAT_JSON;
-                        Yii::$app->response->data = [
-                            'result' => 'error',
-                            'message' => 'Для отправка сообщение нужен зарегистрироваться.'
-                        ];
-                        return Yii::$app->response->send();
-                    }
-
-                    throw new \Exception('У вас нет доступа к этой странице');
+                    throw new \yii\web\HttpException(403, 'У вас нет доступа к этой операция');
                 }
             ],
             'verbs' => [
@@ -71,41 +61,46 @@ class ChatMessageController extends Controller
 
     public function actionCreate()
     {
-        $chatForm = new ChatMessageForm();
-        if($chatForm->load(\Yii::$app->request->post()) && $chatForm->validate()){
-            $chatMessage = new ChatMessage();
-            $chatMessage->text = $chatForm->text;
-            $chatMessage->user_id = \Yii::$app->user->getId();
-            $chatMessage->created_at = date("Y-m-d H:i:s", time());
-            if($chatMessage->save()){
-                Yii::$app->response->format = Response::FORMAT_JSON;
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $chatMessage = new ChatMessage();
+        if($chatMessage->load(\Yii::$app->request->post())){
+            if($chatMessage->create()){
                 Yii::$app->response->data = ['result' => 'ok'];
-                return Yii::$app->response->send();
+            }else{
+                Yii::$app->response->data = [
+                    'result' => 'error',
+                    'message' => 'Ошибка во время создания сообщения'
+                ];
             }
         }
+        return Yii::$app->response->send();
     }
 
     public function actionIncorrect($id){
+        Yii::$app->response->format = Response::FORMAT_JSON;
         $chatMessage = ChatMessage::findOne($id);
-        if ($chatMessage){
-            $chatMessage->status = ChatMessage::STATUS_INCORRECT;
-            if ($chatMessage->save()){
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                Yii::$app->response->data = ['result' => 'ok'];
-                return Yii::$app->response->send();
-            }
+        if ($chatMessage && $chatMessage->setIncorrect()){
+            Yii::$app->response->data = ['result' => 'ok'];
+        }else{
+            Yii::$app->response->data = [
+                'result' => 'error',
+                'message' => 'Ошибка во время выполнения операция'
+            ];
         }
+        return Yii::$app->response->send();
     }
 
     public function actionCorrect($id){
+        Yii::$app->response->format = Response::FORMAT_JSON;
         $chatMessage = ChatMessage::findOne($id);
-        if ($chatMessage){
-            $chatMessage->status = ChatMessage::STATUS_ACTIVE;
-            if ($chatMessage->save()){
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                Yii::$app->response->data = ['result' => 'ok'];
-                return Yii::$app->response->send();
-            }
+        if ($chatMessage && $chatMessage->setCorrect()){
+            Yii::$app->response->data = ['result' => 'ok'];
+        }else{
+            Yii::$app->response->data = [
+                'result' => 'error',
+                'message' => 'Ошибка во время выполнения операция'
+            ];
         }
+        return Yii::$app->response->send();
     }
 }
