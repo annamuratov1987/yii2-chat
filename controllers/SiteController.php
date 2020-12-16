@@ -42,7 +42,7 @@ class SiteController extends Controller
                     ]
                 ],
                 'denyCallback' => function ($rule, $action) {
-                    throw new \Exception('У вас нет доступа к этой странице');
+                    throw new \yii\web\HttpException(403, 'У вас нет доступа к этой странице');
                 }
             ],
             'verbs' => [
