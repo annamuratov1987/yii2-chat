@@ -67,9 +67,13 @@ class ChatMessageController extends Controller
             if($chatMessage->save()){
                 Yii::$app->response->data = ['result' => 'ok'];
             }else{
+                $message = '';
+                foreach ($chatMessage->errors as $errors){
+                    $message.= implode(', ', $errors).'. ';
+                }
                 Yii::$app->response->data = [
                     'result' => 'error',
-                    'message' => 'Ошибка во время создания сообщения'
+                    'message' => $message
                 ];
             }
         }
@@ -82,9 +86,13 @@ class ChatMessageController extends Controller
         if ($chatMessage && $chatMessage->setIncorrect()){
             Yii::$app->response->data = ['result' => 'ok'];
         }else{
+            $message = '';
+            foreach ($chatMessage->errors as $errors){
+                $message.= implode(', ', $errors).'. ';
+            }
             Yii::$app->response->data = [
                 'result' => 'error',
-                'message' => 'Ошибка во время выполнения операция'
+                'message' => $message
             ];
         }
         return Yii::$app->response->send();
@@ -96,9 +104,13 @@ class ChatMessageController extends Controller
         if ($chatMessage && $chatMessage->setCorrect()){
             Yii::$app->response->data = ['result' => 'ok'];
         }else{
+            $message = '';
+            foreach ($chatMessage->errors as $errors){
+                $message.= implode(', ', $errors).'. ';
+            }
             Yii::$app->response->data = [
                 'result' => 'error',
-                'message' => 'Ошибка во время выполнения операция'
+                'message' => $message
             ];
         }
         return Yii::$app->response->send();
