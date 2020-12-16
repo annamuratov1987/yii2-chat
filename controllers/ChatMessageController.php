@@ -64,7 +64,7 @@ class ChatMessageController extends Controller
         Yii::$app->response->format = Response::FORMAT_JSON;
         $chatMessage = new ChatMessage();
         if($chatMessage->load(\Yii::$app->request->post())){
-            if($chatMessage->create()){
+            if($chatMessage->save()){
                 Yii::$app->response->data = ['result' => 'ok'];
             }else{
                 Yii::$app->response->data = [

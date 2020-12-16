@@ -12,21 +12,40 @@ class ChatMessage extends \yii\db\ActiveRecord
         return '{{chat_message}}';
     }
 
+    public function behaviors()
+    {
+        return [
+            'timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'attributes' => [
+                    static::EVENT_BEFORE_INSERT => ['created_at'],
+                ],
+            ],
+        ];
+    }
+
     public function rules() {
         return [
             ['text', 'required', 'message' => 'Нет текст сообщения'],
-            ['user_id', 'required', 'message' => 'Вы не авторизованный пользователь'],
+            ['text', 'string'],
         ];
+    }
+
+    public function beforeSave($insert)
+    {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+
+        if ($insert){
+            $this->user_id = \Yii::$app->user->getId();
+        }
+
+        return true;
     }
 
     public function getUser(){
         return $this->hasOne(User::className(), ['id' => 'user_id']);
-    }
-
-    public function create(){
-        $this->user_id = \Yii::$app->user->getId();
-        $this->created_at = date("Y-m-d H:i:s", time());
-        return $this->save();
     }
 
     public function setIncorrect(){

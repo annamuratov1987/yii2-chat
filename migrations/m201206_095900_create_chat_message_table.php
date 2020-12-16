@@ -16,7 +16,7 @@ class m201206_095900_create_chat_message_table extends Migration
             'id' => $this->primaryKey(),
             'user_id' => $this->integer()->notNull(),
             'text' => $this->text()->notNull(),
-            'created_at' => $this->dateTime()->notNull(),
+            'created_at' => $this->integer()->notNull(),
             'status' => $this->integer()
         ]);
     }

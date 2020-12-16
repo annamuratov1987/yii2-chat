@@ -28,7 +28,7 @@ $this->title = 'Yii Чат';
                             <?= $chatMessage->user->isAdmin()? '<span class="badge">Админ</span>':' ' ?>
                             <?= Html::encode($chatMessage->user->firstname).' '.Html::encode($chatMessage->user->lastname) ?>
                             (<?= Html::encode($chatMessage->user->username)?>)
-                            <span class="label label-default float-right"><?= $chatMessage->created_at ?></span>
+                            <span class="label label-default float-right"><?= date("Y-m-d H:i:s", $chatMessage->created_at) ?></span>
                             <?if(isset(Yii::$app->user->identity) && Yii::$app->user->identity->isAdmin()):?>
                                 <? if($chatMessage->status == \app\models\ChatMessage::STATUS_INCORRECT):?>
                                     <button type="button" class="btn btn-success btn-xs btn-correct float-right" data-id="<?= $chatMessage->id?>">Сделать корректный</button>
